@@ -65,4 +65,72 @@ in rec {
   in combineAttrs (attrsets.mapAttrsToList (n: v: createPackageWithStdenvs (v // { name = n; }) stdenv extraStdenvs system) packages);
 
   packageAliases = flake: system: aliases: mapAttrs (n: v: flake.packages."${system}"."${v}") aliases;
+
+
+  ### CI ###
+  generateGitlabCITrigger = flake: system: ciPkgName: let
+    ciImage = "nixos/nix";
+    ciFile = "gitlab-ci.yml";
+    discoverStage = "discover";
+    content = ''
+      image: nixos/nix
+
+      stages:
+      - ${discoverStage}
+
+      before_script:
+      - mkdir -vp ~/.config/nix
+      - echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
+
+      discover:
+        stage: discover
+        script:
+          - nix build ".#${ciPkgName}"
+          - cp result/${ciFile} ./${ciFile}
+        trigger:
+          include:
+            - local: ./${ciFile}
+          strategy: depend
+
+    '';
+  in (getPkgs system).stdenv.mkDerivation {
+    name = "gitlab-ci";
+    dontUnpack = true;
+    buildPhase = ''
+      mkdir $out
+      cp "${toFile "${ciFile}" content}" $out/${ciFile}
+    '';
+  };
+  generateDynGitlabCI = flake: system: let
+    ciImage = "nixos/nix";
+    ciFile = "dynamic-gitlab-ci.yml";
+    packages = attrNames flake.outputs.packages."${system}";
+    header = ''
+      image: nixos/nix
+
+      stages:
+      - discover
+
+      before_script:
+      - mkdir -vp ~/.config/nix
+      - echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
+    '';
+    builds = concatStringsSep "\n" (map (package: ''
+      ${dynamicStage}:${package}:
+        stage: ${dynamicStage}
+        script:
+          - nix build .#${package} -o result-${package}
+        artifacts:
+          paths:
+            - result-${package}
+    '') packages);
+    content = concatStringsSep "\n" [ header builds ];
+  in (getPkgs system).stdenv.mkDerivation {
+    name = "gitlab-ci";
+    dontUnpack = true;
+    buildPhase = ''
+      mkdir $out
+      cp "${toFile "${ciFile}" content}" $out/${ciFile}
+    '';
+  };
 }

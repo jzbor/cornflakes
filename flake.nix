@@ -42,7 +42,10 @@
       };
     }) // (lib.packageAliases self system {
       default = "example";
-    });
+    }) // {
+      gitlab-ci = lib.generateGitlabCITrigger self system "gitlab-ci-dyn";
+      gitlab-ci-dyn = lib.generateDynGitlabCI self system;
+    };
   })) // {
     inherit lib;
   });
