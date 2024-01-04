@@ -132,7 +132,8 @@ in rec {
       ${dynamicStage}:${package}:
         stage: ${dynamicStage}
         script:
-          - nix build .#${package} -o result-${package}
+          - nix build .#${package}
+          - cp -rL result result-${package}
         artifacts:
           paths:
             - result-${package}
