@@ -115,6 +115,7 @@ in rec {
   generateDynGitlabCI = flake: system: let
     ciImage = "nixos/nix";
     ciFile = "dynamic-gitlab-ci.yml";
+    dynamicStage = "build";
     packages = attrNames flake.outputs.packages."${system}";
     header = ''
       image: nixos/nix
