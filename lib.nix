@@ -122,7 +122,7 @@ in rec {
       image: nixos/nix
 
       stages:
-      - discover
+      - ${dynamicStage}
 
       before_script:
       - mkdir -vp ~/.config/nix
