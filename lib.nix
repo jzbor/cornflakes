@@ -70,7 +70,7 @@ in rec {
   ### CI ###
   generateGitlabCITrigger = flake: system: ciPkgName: let
     ciImage = "nixos/nix";
-    ciFile = "gitlab-ci.yml";
+    ciFile = "dynamic-gitlab-ci.yml";
     discoverStage = "discover";
     triggerStage = "trigger";
     dynamicStage = "build";
