@@ -72,24 +72,35 @@ in rec {
     ciImage = "nixos/nix";
     ciFile = "gitlab-ci.yml";
     discoverStage = "discover";
+    triggerStage = "trigger";
+    dynamicStage = "build";
     content = ''
       image: nixos/nix
 
       stages:
       - ${discoverStage}
+      - ${triggerStage}
 
       before_script:
       - mkdir -vp ~/.config/nix
       - echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
 
-      discover:
-        stage: discover
+      ${discoverStage}:
+        stage: ${discoverStage}
         script:
           - nix build ".#${ciPkgName}"
           - cp result/${ciFile} ./${ciFile}
+        artifacts:
+          expire_in: 1 hour
+          paths:
+            - dynamic-gitlab-ci.yml
+
+      ${triggerStage}:${dynamicStage}:
+        stage: ${triggerStage}
         trigger:
           include:
-            - local: ./${ciFile}
+            - artifact: dynamic-gitlab-ci.yml
+              job: ${discoverStage}
           strategy: depend
 
     '';
