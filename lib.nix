@@ -113,11 +113,12 @@ in rec {
       cp "${toFile "${ciFile}" content}" $out/${ciFile}
     '';
   };
-  generateDynGitlabCI = flake: system: ignore: let
+  generateDynGitlabCI = flake: system: args: let
     ciImage = "nixos/nix";
     ciFile = "dynamic-gitlab-ci.yml";
     dynamicStage = "build";
-    packages = filter (x: !(elem x ignore)) (attrNames flake.outputs.packages."${system}");
+    packagesPred = if args ? enable then (x: elem x args.enable) else if args ? disable then (x: !(elem x args.disable)) else (x: true);
+    packages = filter packagesPred (attrNames flake.outputs.packages."${system}");
     header = ''
       image: nixos/nix
 

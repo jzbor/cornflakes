@@ -44,7 +44,7 @@
       default = "example";
     }) // {
       gitlab-ci = lib.generateGitlabCITrigger self system "gitlab-ci-dyn";
-      gitlab-ci-dyn = lib.generateDynGitlabCI self system [];
+      gitlab-ci-dyn = lib.generateDynGitlabCI self system { disable = [ "gitlab-ci" "gitlab-ci-dyn" ]; };
     };
   })) // {
     inherit lib;
