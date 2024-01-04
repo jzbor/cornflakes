@@ -105,7 +105,7 @@ in rec {
           strategy: depend
 
     '';
-  in (getPkgs system).stdenv.mkDerivation {
+  in (getPkgs system).stdenvNoCC.mkDerivation {
     name = "gitlab-ci";
     dontUnpack = true;
     buildPhase = ''
@@ -139,7 +139,7 @@ in rec {
             - result-${package}
     '') packages);
     content = concatStringsSep "\n" [ header builds ];
-  in (getPkgs system).stdenv.mkDerivation {
+  in (getPkgs system).stdenvNoCC.mkDerivation {
     name = "gitlab-ci";
     dontUnpack = true;
     buildPhase = ''
