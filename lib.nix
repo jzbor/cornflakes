@@ -70,7 +70,8 @@ in rec {
   ### CI ###
   generateGitlabCITrigger = flake: system: ciPkgName: let
     ciImage = "nixos/nix";
-    ciFile = "dynamic-gitlab-ci.yml";
+    ciFile = "gitlab-ci.yml";
+    dynamicCIFile = "dynamic-gitlab-ci.yml";
     discoverStage = "discover";
     triggerStage = "trigger";
     dynamicStage = "build";
@@ -89,11 +90,11 @@ in rec {
         stage: ${discoverStage}
         script:
           - nix build ".#${ciPkgName}"
-          - cp result/${ciFile} ./${ciFile}
+          - cp result/${dynamicCIFile} ./${dynamicCIFile}
         artifacts:
           expire_in: 1 hour
           paths:
-            - dynamic-gitlab-ci.yml
+            - ${dynamicCIFile}
 
       ${triggerStage}:${dynamicStage}:
         stage: ${triggerStage}
