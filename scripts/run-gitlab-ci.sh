@@ -31,10 +31,12 @@ EOF
 
 
 for package in $pkgs; do
-	if [ -f "$ENABLED_LIST" ] && grep -vx "$package" "$ENABLED_LIST"; then
+	if [ -f "$ENABLED_LIST" ] && ! grep -x "$package" "$ENABLED_LIST" >/dev/null; then
+		echo "Ignoring '$package' (not enabled in $ENABLED_LIST)"
 		continue;
 	fi
-	if [ -f "$DISABLED_LIST" ] && grep -x "$package" "$DISABLED_LIST"; then
+	if [ -f "$DISABLED_LIST" ] && grep -x "$package" "$DISABLED_LIST" >/dev/null; then
+		echo "Ignoring '$package' (disabled in $DISABLED_LIST)"
 		continue;
 	fi
 
