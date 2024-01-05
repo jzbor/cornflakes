@@ -47,7 +47,7 @@
     apps.run-gitlab-ci = lib.createShellApp {
       name = "run-gitlab-ci";
       text = readFile ./scripts/run-gitlab-ci.sh;
-      runtimeInputs = with pkgs; [ jq ];
+      runtimeInputs = with pkgs; [ jq gnused ];
     } system;
   })) // {
     inherit lib;
