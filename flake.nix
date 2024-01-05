@@ -44,10 +44,16 @@
       default = "example";
     });
 
+    ### APPS ###
     apps.gitlab-ci-discover = lib.createShellApp {
       name = "gitlab-ci-discover";
       text = readFile ./scripts/gitlab-ci-discover.sh;
       runtimeInputs = with pkgs; [ jq gnused ];
+    } system;
+
+    apps.add-gitlab-ci = lib.createShellApp {
+      name = "add-gitlab-ci";
+      text = "cp -vi ${self}/gitlab-ci/gitlab-ci.yml .gitlab-ci.yml";
     } system;
   })) // {
     inherit lib;
