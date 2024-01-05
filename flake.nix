@@ -44,9 +44,9 @@
       default = "example";
     });
 
-    apps.run-gitlab-ci = lib.createShellApp {
-      name = "run-gitlab-ci";
-      text = readFile ./scripts/run-gitlab-ci.sh;
+    apps.gitlab-ci-discover = lib.createShellApp {
+      name = "gitlab-ci-discover";
+      text = readFile ./scripts/gitlab-ci-discover.sh;
       runtimeInputs = with pkgs; [ jq gnused ];
     } system;
   })) // {
