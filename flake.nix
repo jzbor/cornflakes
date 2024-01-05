@@ -9,6 +9,7 @@
     lib = import ./lib.nix { inherit (nixpkgs) lib; inherit nixpkgs; };
     getPkgs = system: nixpkgs.legacyPackages."${system}";
   in ((lib.flakeForDefaultSystems (system:
+  with builtins;
   let
     pkgs = nixpkgs.legacyPackages."${system}";
     stdenvs = {
@@ -16,7 +17,6 @@
       clang = pkgs.clangStdenv;
     };
   in {
-
 
     ### EXAMPLES ###
     devShells = lib.createShells {
@@ -42,10 +42,13 @@
       };
     }) // (lib.packageAliases self system {
       default = "example";
-    }) // {
-      gitlab-ci = lib.generateGitlabCITrigger self system "gitlab-ci-dyn";
-      gitlab-ci-dyn = lib.generateDynGitlabCI self system { disable = [ "gitlab-ci" "gitlab-ci-dyn" ]; };
-    };
+    });
+
+    apps.run-gitlab-ci = lib.createShellApp {
+      name = "run-gitlab-ci";
+      text = readFile ./scripts/run-gitlab-ci.sh;
+      runtimeInputs = with pkgs; [ jq ];
+    } system;
   })) // {
     inherit lib;
   });

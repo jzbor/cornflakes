@@ -67,6 +67,15 @@ in rec {
   packageAliases = flake: system: aliases: mapAttrs (n: v: flake.packages."${system}"."${v}") aliases;
 
 
+  ### APPS ###
+  createShellApp = attrs: system: let
+    application = (getPkgs system).writeShellApplication attrs;
+  in {
+    type = "app";
+    program = "${application}/bin/${attrs.name}";
+  };
+
+
   ### CI ###
   generateGitlabCITrigger = flake: system: ciPkgName: let
     ciImage = "nixos/nix";
