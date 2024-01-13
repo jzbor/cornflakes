@@ -68,7 +68,7 @@ in rec {
 
 
   ### APPS ###
-  createShellApp = attrs: system: let
+  createShellApp = system: attrs: let
     application = (getPkgs system).writeShellApplication attrs;
   in {
     type = "app";
