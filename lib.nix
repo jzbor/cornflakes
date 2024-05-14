@@ -6,7 +6,7 @@ let
   getPkgs = system: nixpkgs.legacyPackages.${system};
 in rec {
   ### ATTRSETS ###
-  combineAttrs = attrsets.foldAttrs (a: b: a // b) {};
+  combineAttrs = attrsets.foldAttrs (a: b: attrsets.recursiveUpdate a b) {};
 
 
   ### SYSTEMS ###
