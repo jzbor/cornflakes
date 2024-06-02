@@ -129,7 +129,7 @@ in rec {
     packagesPred = if args ? enable then (x: elem x args.enable) else if args ? disable then (x: !(elem x args.disable)) else (x: true);
     packages = filter packagesPred (attrNames flake.outputs.packages."${system}");
     header = ''
-      image: nixos/nix
+      image: ${ciImage}
 
       stages:
       - ${dynamicStage}
@@ -142,7 +142,7 @@ in rec {
       ${dynamicStage}:${package}:
         stage: ${dynamicStage}
         script:
-          - nix build .#${package}
+          - nix build .?submodules=1#${package}
           - cp -rL result result-${package}
         artifacts:
           paths:
