@@ -24,6 +24,9 @@ image: nixos/nix
 stages:
 - build
 
+variables:
+     GIT_SUBMODULE_STRATEGY: recursive
+
 before_script:
 - mkdir -vp ~/.config/nix
 - echo "experimental-features = nix-command flakes" > ~/.config/nix/nix.conf
@@ -47,7 +50,7 @@ for package in $pkgs; do
 $DYNAMIC_STAGE:$package:
   stage: $DYNAMIC_STAGE
   script:
-    - nix build .#$package
+    - nix build .?submodules=1#$package
     - cp -rL result result-$package
   artifacts:
     paths:
