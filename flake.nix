@@ -1,21 +1,13 @@
 {
   description = "jzbor's flake framework";
-  inputs = {
-    nixpkgs.url = "nixpkgs";
-  };
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-  outputs = { self, nixpkgs }@inputs:
-  let
-    lib = import ./lib.nix { inherit (nixpkgs) lib; inherit nixpkgs; };
-    getPkgs = system: nixpkgs.legacyPackages."${system}";
-  in ((lib.flakeForDefaultSystems (system:
+  outputs = { self, nixpkgs }:
+  (((import ./lib.nix nixpkgs).flakeForDefaultSystems (system:
   with builtins;
   let
     pkgs = nixpkgs.legacyPackages."${system}";
-    stdenvs = {
-      gcc = pkgs.gccStdenv;
-      clang = pkgs.clangStdenv;
-    };
+    lib = import ./lib.nix nixpkgs;
   in {
 
     ### EXAMPLES ###
@@ -56,7 +48,7 @@
       text = "cp -vi ${self}/gitlab-ci/gitlab-ci.yml .gitlab-ci.yml";
     };
   })) // {
-    inherit lib;
+    mkLib = ./lib.nix;
   });
 }
 

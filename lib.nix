@@ -1,6 +1,6 @@
-{ nixpkgs, lib }:
+nixpkgs:
 
-with lib;
+with nixpkgs.lib;
 with builtins;
 let
   getPkgs = system: nixpkgs.legacyPackages.${system};
