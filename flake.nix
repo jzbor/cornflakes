@@ -48,7 +48,7 @@
       text = "cp -vi ${self}/gitlab-ci/gitlab-ci.yml .gitlab-ci.yml";
     };
   })) // {
-    mkLib = ./lib.nix;
+    mkLib = import ./lib.nix;
   });
 }
 
