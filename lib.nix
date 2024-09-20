@@ -24,6 +24,8 @@ in rec {
 
   flakeForDefaultSystems = flakeForSystems defaultSystems;
 
+  mkPkgs = system: nixpkgs.legacyPackages.${system};
+
 
   ### SHELLS ###
   createShellWithStdenvs = shell: defaultStdenv: extraStdenvs: system: listToAttrs ([{
