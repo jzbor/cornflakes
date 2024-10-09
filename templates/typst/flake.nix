@@ -15,9 +15,9 @@
     };
   };
 
-  outputs = { nixpkgs, cf, typix, ... }: (cf.mkLib nixpkgs).flakeForDefaultSystems (system:
+  outputs = { self, nixpkgs, cf, typix, ... }: (cf.mkLib nixpkgs).flakeForDefaultSystems (system:
   let
-    #pkgs = nixpkgs.legacyPackages.${system};
+    pkgs = nixpkgs.legacyPackages.${system};
     typixLib = typix.lib.${system};
     fontPaths = [
       #"${pkgs.noto}/share/fonts/noto"
@@ -34,6 +34,15 @@
 
       # Additional packages
       packages = [];
+    };
+
+    apps.default = self.apps.${system}.open;
+    apps.open = {
+      type = "app";
+      program = pkgs.writeShellApplication {
+        name = "open";
+        text = "${pkgs.xdg-utils}/bin/xdg-open ${self.packages.${system}.default}";
+      } + "/bin/open";
     };
   });
 }
