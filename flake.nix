@@ -49,6 +49,8 @@
     };
   })) // {
     mkLib = import ./lib.nix;
+
+    templates = import ./templates;
   });
 }
 
