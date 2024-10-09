@@ -29,30 +29,30 @@ in rec {
 
   ### SHELLS ###
   createShellWithStdenvs = shell: defaultStdenv: extraStdenvs: system: listToAttrs ([{
-    name = shell.name;
+    inherit (shell) name;
     value = (getPkgs system).mkShell.override { stdenv = defaultStdenv; } (shell // {
       shellHook = "export ENV_NAME=${shell.name}" + "\n" + (shell.shellHook or "");
     });
   }] ++ attrsets.mapAttrsToList (stdenvName: stdenv: {
     name = "${shell.name}-${stdenvName}";
-    value = (getPkgs system).mkShell.override { stdenv = stdenv; } (shell // {
+    value = (getPkgs system).mkShell.override { inherit stdenv; } (shell // {
       shellHook = "export ENV_NAME=${shell.name}-${stdenvName}" + "\n" + (shell.shellHook or "");
     });
   }) extraStdenvs);
 
   createShells = args: shells:
   let
-    system = args.system;
+    inherit (args) system;
     stdenv = args.stdenv or (getPkgs system).stdenv;
     extraStdenvs = args.extraStdenvs or {};
   in combineAttrs (attrsets.mapAttrsToList (n: v: createShellWithStdenvs (v // { name = n; }) stdenv extraStdenvs system) shells);
 
-  shellAliases = flake: system: aliases: mapAttrs (n: v: flake.devShells."${system}"."${v}") aliases;
+  shellAliases = flake: system: aliases: mapAttrs (_: v: flake.devShells."${system}"."${v}") aliases;
 
 
   ### PACKAGES ###
-  createPackageWithStdenvs = package: defaultStdenv: extraStdenvs: system: listToAttrs ([{
-    name = package.name;
+  createPackageWithStdenvs = package: defaultStdenv: extraStdenvs: _: listToAttrs ([{
+    inherit (package) name;
     value = defaultStdenv.mkDerivation package;
   }] ++ attrsets.mapAttrsToList (stdenvName: stdenv: {
     name = "${package.name}-${stdenvName}";
@@ -61,12 +61,12 @@ in rec {
 
   createPackages = args: packages:
   let
-    system = args.system;
+    inherit (args) system;
     stdenv = args.stdenv or (getPkgs system).stdenv;
     extraStdenvs = args.extraStdenvs or {};
   in combineAttrs (attrsets.mapAttrsToList (n: v: createPackageWithStdenvs (v // { name = n; }) stdenv extraStdenvs system) packages);
 
-  packageAliases = flake: system: aliases: mapAttrs (n: v: flake.packages."${system}"."${v}") aliases;
+  packageAliases = flake: system: aliases: mapAttrs (_: v: flake.packages."${system}"."${v}") aliases;
 
 
   ### APPS ###
