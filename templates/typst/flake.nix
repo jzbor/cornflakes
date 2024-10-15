@@ -3,11 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-
-    cf = {
-      url = "github:jzbor/cornflakes";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    cf.url = "github:jzbor/cornflakes";
 
     typix = {
       url = "github:loqusion/typix";
