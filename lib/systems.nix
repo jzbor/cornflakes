@@ -1,6 +1,8 @@
 nixpkgs:
 
-rec {
+let
+  inherit (import ./attrsets.nix nixpkgs) combineAttrs;
+in rec {
   defaultSystems = [ "aarch64-linux" "aarch64-darwin" "x86_64-darwin" "x86_64-linux" ];
 
   foreachSystem = systems: content: nixpkgs.lib.listToAttrs (map (name: {
@@ -9,7 +11,7 @@ rec {
   }) systems);
   foreachDefaultSystem = foreachSystem defaultSystems;
 
-  flakeForSystems = systems: flake: nixpkgs.lib.combineAttrs (
+  flakeForSystems = systems: flake: combineAttrs (
     nixpkgs.lib.flatten (
       map (system: nixpkgs.lib.attrsets.mapAttrsToList (
         attrName: attrValue: {
