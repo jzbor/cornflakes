@@ -14,6 +14,7 @@ rec {
     in
     fold' 0;
 
+
   ### ATTRSETS ###
   combineAttrs = foldAttrs (a: b: recursiveUpdate a b) {};
 
@@ -37,7 +38,22 @@ rec {
     filtered = filterAttrs (n: v: v != filterId) mapped;
   in filtered;
 
-  dirToAttrsFn = path: args: map (x: x args) (dirToAttrs path);
+  dirToAttrsFn = path: args: mapAttrs (_: x: x args) (dirToAttrs path);
+
+  dirsToAttrs = paths: let
+    deepAttrs = map (path: { ${baseNameOf path} = dirToAttrs path; }) paths;
+  in combineAttrs deepAttrs;
+  dirsToAttrsFn = paths: args: let
+    deepAttrs = map (path: { ${baseNameOf path} = dirToAttrsFn path args; }) paths;
+  in combineAttrs deepAttrs;
+
+  subdirsToAttrs = path: let
+    dirs = attrNames (filterAttrs (_: type: type == "directory") (readDir path));
+  in dirsToAttrs (map (sub: path + "/${sub}") dirs);
+  subdirsToAttrsFn = path: let
+    dirs = attrNames (filterAttrs (_: type: type == "directory") (readDir path));
+  in dirsToAttrsFn (map (sub: path + "/${sub}") dirs);
+
 
   # From nixpkgs.lib
   filterAttrs = pred: set: removeAttrs set (filter (name: !pred name set.${name}) (attrNames set));
@@ -71,9 +87,10 @@ rec {
         );
     in
     f [ ] [ rhs lhs ];
+  mapCartesianProduct = f: attrsOfLists: map f (cartesianProduct attrsOfLists);
 
 
-  ### SYSTEMS ###
+  ### FLAKES ###
   defaultSystems = [ "aarch64-linux" "aarch64-darwin" "x86_64-darwin" "x86_64-linux" ];
 
   foreachSystem = systems: content: nixpkgs.lib.listToAttrs (map (name: {
@@ -92,5 +109,42 @@ rec {
   flakeForDefaultSystems = flakeForSystems defaultSystems;
 
   mkPkgs = nixpkgs: system: nixpkgs.legacyPackages."${system}";
+
+  mkFlake = args: let
+    cfLib = import ./lib.nix;
+    defaultArgs = {
+      inputs = {};
+      systems = [ "x86_64-linux" "aarch64-linux" ];
+      perSystem = _: {};
+      outputs = _: {};
+    };
+    finalArgs = defaultArgs // args // (
+      if !(args ? nixpkgs) && args ? inputs && args.inputs ? nixpkgs
+      then { inherit (args.inputs) nixpkgs; }
+      else {}
+    );
+    perSystemOutputs = combineAttrs (map (system:
+      mapAttrs' (attrName: attrValue: {
+        name = attrName;
+        value.${system} = attrValue;
+      }) (finalArgs.perSystem (
+        {
+          inherit (finalArgs) inputs;
+        } // (
+          if finalArgs ? nixpkgs
+          then { pkgs = mkPkgs finalArgs.nixpkgs system; }
+          else {}
+        ) // (
+          if finalArgs ? nixpkgs
+          then { cfLib = cfLib.withPkgs (mkPkgs finalArgs.nixpkgs system); }
+          else { inherit cfLib; }
+        )
+      )
+    )) finalArgs.systems);
+    otherOutputs = finalArgs.outputs {
+      inherit (finalArgs) inputs;
+      inherit cfLib;
+    };
+  in perSystemOutputs // otherOutputs;
 }
 
