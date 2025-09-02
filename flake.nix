@@ -1,9 +1,9 @@
 {
   description = "jzbor's flake framework";
 
-  outputs = inputs: {
+  outputs = inputs: rec {
     lib = import ./lib.nix;
-    mkLib = pkgs: (import ./lib/withpkgs.nix inputs.nixpkgs).withPkgs pkgs;
+    mkLib = lib.withPkgs;
     templates = import ./templates;
   };
 }

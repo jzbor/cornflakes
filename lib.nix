@@ -13,6 +13,7 @@ rec {
       fold' = n: if n == len then nul else op (elemAt list n) (fold' (n + 1));
     in
     fold' 0;
+  flatten = x: if isList x then concatMap (y: flatten y) x else [ x ];
 
 
   ### ATTRSETS ###
@@ -93,15 +94,15 @@ rec {
   ### FLAKES ###
   defaultSystems = [ "aarch64-linux" "aarch64-darwin" "x86_64-darwin" "x86_64-linux" ];
 
-  foreachSystem = systems: content: nixpkgs.lib.listToAttrs (map (name: {
+  foreachSystem = systems: content: listToAttrs (map (name: {
     inherit name;
     value = content name;
   }) systems);
   foreachDefaultSystem = foreachSystem defaultSystems;
 
   flakeForSystems = systems: flake: combineAttrs (
-    nixpkgs.lib.flatten (
-      map (system: nixpkgs.lib.attrsets.mapAttrsToList (
+    flatten (
+      map (system: mapAttrsToList (
         attrName: attrValue: {
           ${attrName}.${system} = attrValue;
         }) (flake system)) systems));
