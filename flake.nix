@@ -1,7 +1,7 @@
 {
   description = "jzbor's flake framework";
 
-  outputs = inputs: rec {
+  outputs = _: rec {
     lib = import ./lib.nix;
     mkLib = lib.withPkgs;
     templates = import ./templates;

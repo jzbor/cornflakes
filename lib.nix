@@ -13,7 +13,7 @@ rec {
       fold' = n: if n == len then nul else op (elemAt list n) (fold' (n + 1));
     in
     fold' 0;
-  flatten = x: if isList x then concatMap (y: flatten y) x else [ x ];
+  flatten = x: if isList x then concatMap flatten x else [ x ];
 
 
   ### ATTRSETS ###
@@ -24,20 +24,16 @@ rec {
     filterId = "__cf_filter";
     hasNixSuffix = s: stringLength s > 4 && substring ((stringLength s) - 4) 4 s == ".nix";
     mapped = mapAttrs' (name: type: {
-      name = (
-        if (type == "regular" || type == "symlink") && hasNixSuffix name
-        then substring 0 ((stringLength name) - 4) name
-        else name
-        );
-      value = (
-        if (type == "regular" || type == "symlink") && hasNixSuffix name
-        then import (path + "/${name}")
-        else if (type == "directory" || type == "symlink") && pathExists (path + "/${name}/default.nix")
-        then import (path + "/${name}/default.nix")
-        else filterId
-      );
+      name = if (type == "regular" || type == "symlink") && hasNixSuffix name
+             then substring 0 ((stringLength name) - 4) name
+             else name;
+      value = if (type == "regular" || type == "symlink") && hasNixSuffix name
+              then import (path + "/${name}")
+              else if (type == "directory" || type == "symlink") && pathExists (path + "/${name}/default.nix")
+              then import (path + "/${name}/default.nix")
+              else filterId;
     }) files;
-    filtered = filterAttrs (n: v: v != filterId) mapped;
+    filtered = filterAttrs (_: v: v != filterId) mapped;
   in filtered;
 
   dirToAttrsFn = path: args: mapAttrs (_: x: x args) (dirToAttrs path);
@@ -69,7 +65,7 @@ rec {
   recursiveUpdate =
     lhs: rhs:
     recursiveUpdateUntil (
-      path: lhs: rhs:
+      _: lhs: rhs:
       !(isAttrs lhs && isAttrs rhs)
       ) lhs rhs;
   recursiveUpdateUntil =
@@ -133,7 +129,7 @@ rec {
         {
           inherit (finalArgs) inputs;
           inherit system;
-          systemPackages = mapAttrs (name: flakeAttrs:
+          systemPackages = mapAttrs (_: flakeAttrs:
             if flakeAttrs ? packages && flakeAttrs.packages ? ${system}
             then flakeAttrs.packages.${system}
             else {}
