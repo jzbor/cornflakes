@@ -161,5 +161,12 @@ rec {
       else {}
     ));
   in perSystemOutputs // otherOutputs;
+
+
+  ### NIXOS SYSTEMS ###
+  nixosFromConfig = nixpkgs: args: cfg: nixpkgs.lib.nixosSystem {
+    modules = [ cfg ];
+    specialArgs = args;
+  };
 }
 

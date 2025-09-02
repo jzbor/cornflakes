@@ -42,5 +42,8 @@ rec {
   in combineAttrs (attrsets.mapAttrsToList (n: v: createShellWithStdenvs (v // { name = n; }) stdenv extraStdenvs) shells);
 
   shellAliases = flake: system: aliases: mapAttrs (_: v: flake.devShells."${system}"."${v}") aliases;
+
+
+  ### NIXOS SYSTEMS ###
 } // (import ./lib.nix)
 
