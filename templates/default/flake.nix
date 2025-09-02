@@ -6,15 +6,8 @@
     cf.url = "github:jzbor/cornflakes";
   };
 
-  outputs = { self, nixpkgs, cf, ... }: (cf.mkLib nixpkgs).flakeForDefaultSystems (system:
-  let
-    pkgs = nixpkgs.legacyPackages.${system};
-  in {
-    packages.default = pkgs.hello;
-
-    devShells.default = pkgs.mkShellNoCC {
-      inherit (self.packages.${system}.default) name;
-      nativeBuildInputs = [ pkgs.hello ];
-    };
-  });
+  outputs = inputs: inputs.cf.lib.mkFlake {
+    inherit inputs;
+    perSystem = { cfLib, ... }@args: cfLib.subdirsToAttrsFn ./nix args;
+  };
 }
