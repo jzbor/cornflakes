@@ -131,6 +131,7 @@ rec {
       }) (finalArgs.perSystem (
         {
           inherit (finalArgs) inputs;
+          inherit system;
         } // (
           if finalArgs ? nixpkgs
           then { pkgs = mkPkgs finalArgs.nixpkgs system; }
@@ -139,13 +140,21 @@ rec {
           if finalArgs ? nixpkgs
           then { cfLib = cfLib.withPkgs (mkPkgs finalArgs.nixpkgs system); }
           else { inherit cfLib; }
+        ) // (
+          if finalArgs.inputs ? self
+          then { inherit (finalArgs.inputs) self; }
+          else {}
         )
       )
     )) finalArgs.systems);
-    otherOutputs = finalArgs.outputs {
+    otherOutputs = finalArgs.outputs ({
       inherit (finalArgs) inputs;
       inherit cfLib;
-    };
+    } // (
+      if finalArgs.inputs ? self
+      then { inherit (finalArgs.inputs) self; }
+      else {}
+    ));
   in perSystemOutputs // otherOutputs;
 }
 
