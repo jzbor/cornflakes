@@ -43,7 +43,5 @@ rec {
 
   shellAliases = flake: system: aliases: mapAttrs (_: v: flake.devShells."${system}"."${v}") aliases;
 
-
-  ### NIXOS SYSTEMS ###
 } // (import ./lib.nix)
 

@@ -22,16 +22,17 @@ rec {
   dirToAttrs = path: let
     files = readDir path;
     filterId = "__cf_filter";
+    hasNixSuffix = s: stringLength s > 4 && substring ((stringLength s) - 4) 4 s == ".nix";
     mapped = mapAttrs' (name: type: {
       name = (
-        if type == "regular" && stringLength name > 4 && substring ((stringLength name) - 4) 4 name == ".nix"
+        if (type == "regular" || type == "symlink") && hasNixSuffix name
         then substring 0 ((stringLength name) - 4) name
         else name
         );
       value = (
-        if type == "regular" && stringLength name > 4 && substring ((stringLength name) - 4) 4 name == ".nix"
+        if (type == "regular" || type == "symlink") && hasNixSuffix name
         then import (path + "/${name}")
-        else if type == "directory" && pathExists (path + "/${name}/default.nix")
+        else if (type == "directory" || type == "symlink") && pathExists (path + "/${name}/default.nix")
         then import (path + "/${name}/default.nix")
         else filterId
       );
