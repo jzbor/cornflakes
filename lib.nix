@@ -168,5 +168,6 @@ rec {
     modules = [ cfg ];
     specialArgs = args;
   };
+  nixosFromDirs = path: args: builtins.mapAttrs (n: nixosFromConfig args.inputs.nixpkgs args) (dirToAttrs path);
 }
 
