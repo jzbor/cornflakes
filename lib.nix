@@ -132,6 +132,11 @@ rec {
         {
           inherit (finalArgs) inputs;
           inherit system;
+          systemPackages = mapAttrs (name: flakeAttrs:
+            if flakeAttrs ? packages && flakeAttrs.packages ? ${system}
+            then flakeAttrs.packages.${system}
+            else {}
+          ) finalArgs.inputs;
         } // (
           if finalArgs ? nixpkgs
           then { pkgs = mkPkgs finalArgs.nixpkgs system; }
