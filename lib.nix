@@ -160,6 +160,17 @@ rec {
   in perSystemOutputs // otherOutputs;
 
 
+  ### FLAKE COMPATIBILITY ###
+  mkCompatFlake = attrs: systems: let
+    packages = listToAttrs (map (system: {
+      name = system;
+      value = (attrs { inherit system; }).packages;
+    }) systems);
+  in {
+    inherit packages;
+  };
+
+
   ### NIXOS SYSTEMS ###
   nixosFromConfig = nixpkgs: args: cfg: nixpkgs.lib.nixosSystem {
     modules = [ cfg ];
