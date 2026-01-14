@@ -43,5 +43,31 @@ rec {
 
   shellAliases = flake: system: aliases: mapAttrs (_: v: flake.devShells."${system}"."${v}") aliases;
 
+
+  ### CHECKS ###
+  mkStatixCheck = src: addArgs: pkgs.stdenvNoCC.mkDerivation {
+    name = "statix-report";
+    src = pkgs.lib.cleanSourceWith {
+      inherit src;
+      filter = path: _type: builtins.match ".*nix$" path != null;
+      name = "source";
+    };
+    buildPhase = ''
+        ${pkgs.statix}/bin/statix check -i /npins/ ${addArgs} | tee $out
+    '';
+  };
+
+  mkDeadnixCheck = src: addArgs: pkgs.stdenvNoCC.mkDerivation {
+    name = "deadnix-report";
+    src = pkgs.lib.cleanSourceWith {
+      inherit src;
+      filter = path: _type: builtins.match ".*nix$" path != null;
+      name = "source";
+    };
+    buildPhase = ''
+        ${pkgs.deadnix}/bin/deadnix -_ -L -f ${addArgs} | tee $out
+    '';
+  };
+
 } // (import ./lib.nix)
 
