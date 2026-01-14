@@ -45,7 +45,7 @@ rec {
 
 
   ### CHECKS ###
-  mkStatixCheck = src: addArgs: pkgs.stdenvNoCC.mkDerivation {
+  mkStatixCheck = { src, additionalArgs ? "" }: pkgs.stdenvNoCC.mkDerivation {
     name = "statix-report";
     src = pkgs.lib.cleanSourceWith {
       inherit src;
@@ -53,11 +53,11 @@ rec {
       name = "source";
     };
     buildPhase = ''
-        ${pkgs.statix}/bin/statix check -i /npins/ ${addArgs} | tee $out
+        ${pkgs.statix}/bin/statix check -i /npins/ ${additionalArgs} | tee $out
     '';
   };
 
-  mkDeadnixCheck = src: addArgs: pkgs.stdenvNoCC.mkDerivation {
+  mkDeadnixCheck = { src, additionalArgs ? "" }: pkgs.stdenvNoCC.mkDerivation {
     name = "deadnix-report";
     src = pkgs.lib.cleanSourceWith {
       inherit src;
@@ -65,7 +65,7 @@ rec {
       name = "source";
     };
     buildPhase = ''
-        ${pkgs.deadnix}/bin/deadnix -_ -L -f ${addArgs} | tee $out
+        ${pkgs.deadnix}/bin/deadnix -_ -L -f ${additionalArgs} | tee $out
     '';
   };
 
