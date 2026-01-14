@@ -166,9 +166,17 @@ rec {
       name = system;
       value = (attrs { inherit system; }).packages;
     }) systems);
+    checks = listToAttrs (map (system: {
+      name = system;
+      value = (attrs { inherit system; }).checks;
+    }) systems);
+    devShells = listToAttrs (map (system: {
+      name = system;
+      value = (attrs { inherit system; }).checks;
+    }) systems);
   in {
-    inherit packages;
-  };
+    inherit packages checks devShells;
+  } // (removeAttrs (attrs { system = "<cf-invalid-system>"; }) [ "packages" "checks" "devShells" ]);
 
 
   ### NIXOS SYSTEMS ###
