@@ -172,7 +172,7 @@ rec {
     }) systems);
     devShells = listToAttrs (map (system: {
       name = system;
-      value = (attrs { inherit system; }).checks;
+      value = (attrs { inherit system; }).devShells;
     }) systems);
   in {
     inherit packages checks devShells;
